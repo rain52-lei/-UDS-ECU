@@ -1,0 +1,38 @@
+# S32 Design Studio build outputs
+/Debug_FLASH/
+/Release_FLASH/
+/Debug_RAM/
+/Release_RAM/
+*.o
+*.d
+*.elf
+*.map
+*.siz
+*.hex
+*.bin
+*.srec
+*.lst
+
+# Local backups and temporary files
+/include.bak/
+/src.bak/
+/Linker_Files.bak/
+/Startup_Code.bak/
+/Documentation/refactor_backups/
+/Documentation/*_Settings.previous.xml
+*.bak
+*.tmp
+*~
+
+# Processor Expert machine-local generator caches
+/.ThermoGuard_SDK.g_c
+/.ThermoGuard_SDK.g_x
+
+# Machine-specific debugger launch configurations
+/Project_Settings/Debugger/*.launch
+
+# Operating system and editor noise
+Thumbs.db
+Desktop.ini
+.DS_Store
+*.log

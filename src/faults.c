@@ -1,41 +1,30 @@
 #include "faults.h"
-#include <stdint.h>
 
-#define SENSOR_BAD_SAMPLE_LIMIT  3U
-#define OVERTEMP_TRIP_DC       1000
-
-static uint8_t s_sensor_bad_samples = 0U;
-static bool s_overtemp_latched = false;
+static uint8_t s_bad_samples;
+static bool s_overtemp;
 
 void faults_init(void)
 {
-	s_sensor_bad_samples = 0U;
-	s_overtemp_latched = false;
+    s_bad_samples = 0U;
+    s_overtemp = false;
 }
 
-bool faults_sensor_update(bool sensor_valid)
+bool faults_sensor_update(bool valid)
 {
-	if(sensor_valid){
-		s_sensor_bad_samples = 0U;
-	}else if(s_sensor_bad_samples < SENSOR_BAD_SAMPLE_LIMIT){
-		++s_sensor_bad_samples;
-	}
-
-	return s_sensor_bad_samples >= SENSOR_BAD_SAMPLE_LIMIT;
+    if (valid) { s_bad_samples = 0U; }
+    else if (s_bad_samples < 3U) { ++s_bad_samples; }
+    return s_bad_samples >= 3U;
 }
 
-bool faults_overtemp_update(bool sensor_valid, int16_t temperature_dC)
+bool faults_overtemp_update(bool valid, int16_t temperature)
 {
-	if(sensor_valid && temperature_dC >= OVERTEMP_TRIP_DC){
-		s_overtemp_latched = true;
-	}
-
-	return s_overtemp_latched;
+    if (valid && temperature >= 1000) { s_overtemp = true; }
+    return s_overtemp;
 }
 
-
-
-
-
-
-
+bool faults_clear_overtemp(bool valid, int16_t temperature, bool enabled)
+{
+    if (!valid || temperature >= 900 || enabled) { return false; }
+    s_overtemp = false;
+    return true;
+}

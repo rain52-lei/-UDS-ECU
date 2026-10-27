@@ -36,3 +36,11 @@ Thumbs.db
 Desktop.ini
 .DS_Store
 *.log
+
+# Reproducible command-line outputs
+/build/
+__pycache__/
+*.pyc
+
+# Local learning notes and teaching documents
+/Documentation/*.md

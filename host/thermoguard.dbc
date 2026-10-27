@@ -1,0 +1,32 @@
+VERSION "ThermoGuard SDK 2.0"
+
+NS_ :
+    NS_DESC_
+    CM_
+    BA_DEF_
+    BA_
+    VAL_
+
+BS_:
+
+BU_: ECU Tester
+
+BO_ 512 ThermalStatus: 8 ECU
+ SG_ Temperature : 7|16@0- (0.1,0) [-3276.8|3276.7] "degC" Tester
+ SG_ Target : 23|16@0- (0.1,0) [20|80] "degC" Tester
+ SG_ Cooling : 39|16@0+ (1,0) [0|1000] "permille" Tester
+ SG_ State : 48|8@1+ (1,0) [0|3] "" Tester
+ SG_ SensorValid : 56|1@1+ (1,0) [0|1] "" Tester
+ SG_ SensorFault : 57|1@1+ (1,0) [0|1] "" Tester
+ SG_ OvertempLatched : 58|1@1+ (1,0) [0|1] "" Tester
+ SG_ EnableRequest : 59|1@1+ (1,0) [0|1] "" Tester
+
+BO_ 513 ThermalCommand: 8 Tester
+ SG_ Type : 0|8@1+ (1,0) [1|1] "" ECU
+ SG_ Counter : 8|8@1+ (1,0) [0|255] "" ECU
+ SG_ Target : 23|16@0- (0.1,0) [20|80] "degC" ECU
+ SG_ EnableRequest : 32|1@1+ (1,0) [0|1] "" ECU
+ SG_ CRC8 : 56|8@1+ (1,0) [0|255] "" ECU
+
+VAL_ 512 State 0 "OFF" 1 "RUNNING" 2 "FAILSAFE" 3 "DEGRADED";
+CM_ BO_ 513 "CRC-8 SAE-J1850 over bytes 0..6; polynomial 0x1D init 0xFF xorout 0xFF; no reflection. Byte4 bits1..7 and bytes5..6 must be zero.";

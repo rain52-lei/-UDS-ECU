@@ -35,6 +35,7 @@
 #include "pwm_output.h"
 #include "serial_port.h"
 #include "can_port.h"
+#include "watchdog_port.h"
 
 volatile status_t g_init_status = STATUS_SUCCESS;
 volatile status_t g_uart_tx_status = STATUS_SUCCESS;
@@ -63,6 +64,8 @@ int main(void)
   if (g_init_status != STATUS_SUCCESS) {
       for (;;) {}
   }
+
+  if (!watchdog_port_init()) { for (;;) {} }
 
   g_init_status = PINS_DRV_Init(NUM_OF_CONFIGURED_PINS,
                                g_pin_mux_InitConfigArr);
@@ -112,8 +115,8 @@ int main(void)
   g_uart_tx_status = serial_port_send(s_boot_message, sizeof(s_boot_message) - 1U);
 
   for (;;) {
-      app_poll();
       can_port_poll();
+      app_poll();
       g_uart_tx_poll_status = serial_port_get_tx_status();
   }
 

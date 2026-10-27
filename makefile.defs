@@ -1,0 +1,8 @@
+# Managed builds may not have refreshed the source list yet.
+# Include new src/*.c objects exactly once; S32DS will normally discover them itself.
+TG_EXTRA_SRCS := $(filter-out $(C_SRCS),$(wildcard ../src/*.c))
+TG_EXTRA_OBJS := $(patsubst ../src/%.c,./src/%.o,$(TG_EXTRA_SRCS))
+OBJS += $(TG_EXTRA_OBJS)
+USER_OBJS += $(TG_EXTRA_OBJS)
+C_DEPS += $(TG_EXTRA_OBJS:.o=.d)
+-include $(TG_EXTRA_OBJS:.o=.d)

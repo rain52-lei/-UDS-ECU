@@ -1,6 +1,8 @@
 #include "uds.h"
 #include <string.h>
 
+static const char s_software_version[] = "ThermoGuard-SDK-2.0";
+
 static void be16(uint8_t *p, uint16_t value)
 {
     p[0] = (uint8_t)(value >> 8U);
@@ -62,8 +64,9 @@ static size_t read_did(uds_t *uds, const uds_snapshot_t *s,
         memcpy(r + 3U, "TGSDK144000000001", 17U);
         return 20U;
     case 0xF180U:
-        memcpy(r + 3U, "ThermoGuard-SDK-2.0", 18U);
-        return 21U;
+        /* 长度随版本内容更新，不发送字符串终止符。 */
+        memcpy(r + 3U, s_software_version, sizeof(s_software_version) - 1U);
+        return 3U + sizeof(s_software_version) - 1U;
     case 0xF1A0U:
         be16(r + 3U, (uint16_t)s->temperature_dC);
         be16(r + 5U, (uint16_t)s->target_dC);

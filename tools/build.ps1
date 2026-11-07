@@ -13,7 +13,8 @@ $hostCompiler = if ($env:HOST_GCC) { $env:HOST_GCC } else { 'G:\S32D\S32DS\build
 $env:PATH = (Split-Path $hostCompiler -Parent) + ';' + $env:PATH
 $pure = @('can_protocol','remote_control','diag_store','isotp','uds','scheduler_guard','faults','control','ecu_state','temperature')
 $pureSources = @($pure | ForEach-Object { Join-Path $root "src\$_.c" })
-$flags = @('-std=c99','-Wall','-Wextra','-Werror','-pedantic','-O2',"-I$root\include")
+# Host tests exercise the internal loopback path; the firmware default is normal mode.
+$flags = @('-std=c99','-Wall','-Wextra','-Werror','-pedantic','-O2',"-I$root\include",'-DTG_CAN_LOOPBACK=1')
 Run $hostCompiler ($flags + @('-static') + $pureSources + @("$root\tests\test_core.c",'-o',"$out\test_core.exe"))
 Run "$out\test_core.exe" @()
 Run $hostCompiler ($flags + @('-static',"-I$root\SDK\platform\devices") + $pureSources + @(
@@ -44,6 +45,7 @@ $common = @('-std=c99','-Wall','-Wextra','-Werror','-pedantic','-O1','-g','-mcpu
     '-DCPU_S32K144HFT0VLLT','-DCPU_S32K144','-DTURN_ON_CPU0','-DSTART_FROM_FLASH',"--sysroot=$runtime")
 $common += @($incs | ForEach-Object { '-I' + (Join-Path $root $_) })
 if ($ExternalCan) { $common += '-DTG_CAN_LOOPBACK=0' }
+else { $common += '-DTG_CAN_LOOPBACK=1' }
 if ($Watchdog) { $common += '-DTG_WATCHDOG_ENABLE=1' }
 $sourceDirs = @('src','Generated_Code','Sources','SDK')
 $sources = @($sourceDirs | ForEach-Object { Get-ChildItem -LiteralPath (Join-Path $root $_) -Filter '*.c' -File -Recurse })

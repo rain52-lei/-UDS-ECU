@@ -1,9 +1,9 @@
 #ifndef THERMOGUARD_APP_CONFIG_H
 #define THERMOGUARD_APP_CONFIG_H
 
-/* 调试默认使用内部回环；外部总线构建时通过 -D 覆盖为 0。 */
+/* IDE默认使用外部CAN；独立构建脚本通过-D显式选择回环或外部模式。 */
 #ifndef TG_CAN_LOOPBACK
-#define TG_CAN_LOOPBACK 1
+#define TG_CAN_LOOPBACK 0
 #endif
 #ifndef TG_WATCHDOG_ENABLE
 #define TG_WATCHDOG_ENABLE 0

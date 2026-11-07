@@ -9,10 +9,11 @@
 #include "temperature.h"
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 static unsigned checks;
-#define CHECK(x) do { ++checks; if (!(x)) { fprintf(stderr, "FAIL line %d: %s\n", __LINE__, #x); assert(x); } } while (0)
+#define CHECK(x) do { ++checks; if (!(x)) { fprintf(stderr, "FAIL line %d: %s\n", __LINE__, #x); exit(EXIT_FAILURE); } } while (0)
 
 typedef struct { bool busy; uint8_t frames[512][8]; unsigned count; } bus_t;
 static bool emit(void *user, const uint8_t p[8])
@@ -181,6 +182,15 @@ static void test_uds(void)
     q[0] = 0x22U; q[1] = 0xF1U; q[2] = 0x90U;
     length = uds_process(&uds, &snap, q, 3U, r, sizeof(r));
     CHECK(length == 20U && memcmp(r + 3U, "TGSDK144000000001", 17U) == 0);
+    {
+        static const uint8_t expected_version[] = "\x62\xF1\x80" "ThermoGuard-SDK-2.0";
+        q[2] = 0x80U;
+        memset(r, 0xA5, sizeof(r));
+        length = uds_process(&uds, &snap, q, 3U, r, sizeof(r));
+        CHECK(length == sizeof(expected_version) - 1U);
+        CHECK(memcmp(r, expected_version, sizeof(expected_version) - 1U) == 0);
+        CHECK(r[length] == 0xA5U); /* 响应不携带字符串终止符，也不改写后续字节。 */
+    }
     q[0] = 0x2EU; q[2] = 0xA3U; q[3] = 1U; q[4] = 0xC2U;
     CHECK(uds_process(&uds, &snap, q, 5U, r, sizeof(r)) == 3U && r[2] == 0x7FU);
     q[0] = 0x10U; q[1] = 3U;

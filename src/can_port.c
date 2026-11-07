@@ -91,6 +91,13 @@ status_t can_port_init(void)
     status_t status;
     s_runtime_config = can_pal1_Config0;
     s_runtime_config.mode = TG_CAN_LOOPBACK ? CAN_LOOPBACK_MODE : CAN_NORMAL_MODE;
+    /* 8MHz SOSC、500kbit/s：位时间 = 1 + (PROPSEG+1) + (PSEG1+1) + (PSEG2+1) = 16 TQ。
+     * PE 生成的 7/5/3 是 19 TQ（约421kbit/s），必须在此覆盖；重新生成组件也不会丢。 */
+    s_runtime_config.nominalBitrate.propSeg = 7U;
+    s_runtime_config.nominalBitrate.phaseSeg1 = 4U;
+    s_runtime_config.nominalBitrate.phaseSeg2 = 1U;
+    s_runtime_config.nominalBitrate.preDivider = 0U;
+    s_runtime_config.nominalBitrate.rJumpwidth = 1U;
     s_test_started = false;
     g_can_loopback_done = false;
     g_can_loopback_ok = false;
@@ -113,7 +120,13 @@ status_t can_port_init(void)
     if (status != STATUS_SUCCESS) { return status; }
     status = configure_rx(&s_command, RX_COMMAND, CAN_COMMAND_ID);
     if (status != STATUS_SUCCESS) { return status; }
-    return configure_rx(&s_diagnostic, RX_DIAGNOSTIC, TG_DIAG_REQUEST_ID);
+    status = configure_rx(&s_diagnostic, RX_DIAGNOSTIC, TG_DIAG_REQUEST_ID);
+    if (status == STATUS_SUCCESS) {
+        /* 上电指纹帧：PCAN-View 收到 ID 0x123 = 新固件（正常模式）在运行 */
+        uint8_t boot_msg[8] = {0xAAU, 0x55U, 0x55U, 0xAAU, 0U, 0U, 0U, 0U};
+        (void)can_port_send(0x123U, boot_msg, 8U);
+    }
+    return status;
 }
 
 status_t can_port_start_loopback_test(void)
